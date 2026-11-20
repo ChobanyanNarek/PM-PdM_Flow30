@@ -265,37 +265,34 @@
     }
   }
 
-  async function discoverGeminiModel(apiKey) {
+  async function discoverGeminiModels(apiKey) {
     try {
       const resp = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
         {},
-        8000
+        10000
       );
-      if (!resp.ok) return null;
+      if (!resp.ok) {
+        const errTxt = await resp.text();
+        return { models: [], error: `ListModels (${resp.status}): ${errTxt.slice(0, 120)}` };
+      }
       const data = await resp.json();
       const candidates = (data.models || [])
-        .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/i.test(m.name) && !/image|tts|audio|embedding/i.test(m.name))
+        .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/i.test(m.name) && !/image|tts|audio|embedding|robotics|computer/i.test(m.name))
         .map((m) => m.name.replace(/^models\//, ''));
-      return candidates.find((n) => /flash/i.test(n)) || candidates[0] || null;
-    } catch {
-      return null;
+      candidates.sort((a, b) => {
+        const score = (s) => (/3\.8|4\.0|3\.6|3\.5|3-flash/.test(s) ? 2 : /flash/.test(s) ? 1 : 0);
+        return score(b) - score(a);
+      });
+      return { models: candidates, error: null };
+    } catch (e) {
+      return { models: [], error: `ListModels: ${e.message}` };
     }
   }
 
   async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4, statusCb = null) {
-    const primary = getSelectedModel();
     const cachedModel = localStorage.getItem('pmflow30_working_model');
-    const baseModels = primary === 'gemini-3.8-flash'
-      ? ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite']
-      : ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash-lite'];
-
-    const models = cachedModel && !baseModels.includes(cachedModel)
-      ? [cachedModel, ...baseModels]
-      : cachedModel
-      ? [cachedModel, ...baseModels.filter((m) => m !== cachedModel)]
-      : baseModels;
-
+    const errors = [];
     lastGeminiError = '';
 
     const tryModel = async (model) => {
@@ -310,11 +307,11 @@
             generationConfig: { responseMimeType: 'application/json', temperature }
           })
         },
-        30000
+        25000
       );
       if (!resp.ok) {
         const errTxt = await resp.text();
-        lastGeminiError = `${model} (${resp.status}): ${errTxt.slice(0, 140)}`;
+        errors.push(`${model} (${resp.status}): ${errTxt.slice(0, 100)}`);
         return null;
       }
       const data = await resp.json();
@@ -323,15 +320,20 @@
         try { localStorage.setItem('pmflow30_working_model', model); } catch {}
         return JSON.parse(raw);
       }
+      errors.push(`${model}: empty response`);
       return null;
     };
 
-    // Fast-discover supported models first if no cached working model
-    if (!cachedModel) {
+    let models = [];
+    if (cachedModel) {
+      models = [cachedModel];
+    } else {
       if (statusCb) statusCb('Checking available Gemini models...');
-      const discovered = await discoverGeminiModel(apiKey);
-      if (discovered && !models.includes(discovered)) {
-        models.unshift(discovered);
+      const disc = await discoverGeminiModels(apiKey);
+      if (disc.error) errors.push(disc.error);
+      models = disc.models.slice(0, 4);
+      if (models.length === 0) {
+        models = ['gemini-3-flash-preview', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
       }
     }
 
@@ -340,9 +342,12 @@
         const res = await tryModel(model);
         if (res) return res;
       } catch (e) {
-        lastGeminiError = e.name === 'AbortError' ? `${model}: Timed out (12s)` : e.message;
+        errors.push(e.name === 'AbortError' ? `${model}: Timed out (25s)` : `${model}: ${e.message}`);
       }
     }
+
+    if (cachedModel) localStorage.removeItem('pmflow30_working_model');
+    lastGeminiError = errors.join(' | ');
     return null;
   }
 
