@@ -290,6 +290,22 @@
     }
   }
 
+  function safeParseJSON(raw) {
+    if (!raw) return null;
+    let cleaned = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const first = cleaned.indexOf('{');
+    const last = cleaned.lastIndexOf('}');
+    if (first >= 0 && last > first) {
+      cleaned = cleaned.slice(first, last + 1);
+    }
+    try {
+      return JSON.parse(cleaned);
+    } catch {
+      const noCtrl = cleaned.replace(/[\u0000-\u001F]+/g, ' ');
+      return JSON.parse(noCtrl);
+    }
+  }
+
   async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4, statusCb = null) {
     const cachedModel = localStorage.getItem('pmflow30_working_model');
     const errors = [];
@@ -317,8 +333,11 @@
       const data = await resp.json();
       const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (raw) {
-        try { localStorage.setItem('pmflow30_working_model', model); } catch {}
-        return JSON.parse(raw);
+        const parsed = safeParseJSON(raw);
+        if (parsed) {
+          try { localStorage.setItem('pmflow30_working_model', model); } catch {}
+          return parsed;
+        }
       }
       errors.push(`${model}: empty response`);
       return null;

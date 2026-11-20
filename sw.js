@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pmflow30-v13';
+const CACHE_NAME = 'pmflow30-v14';
 const ASSETS = [
   './',
   './index.html',
