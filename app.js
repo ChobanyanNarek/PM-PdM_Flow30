@@ -251,9 +251,14 @@
     return localStorage.getItem('pmflow30_ai_model') || 'gemini-2.5-pro';
   }
 
+  let lastGeminiError = '';
+
   async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4) {
     const primary = getSelectedModel();
-    const models = primary === 'gemini-2.5-pro' ? ['gemini-2.5-pro', 'gemini-2.5-flash'] : ['gemini-2.5-flash'];
+    const models = primary === 'gemini-2.5-pro'
+      ? ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
+      : ['gemini-2.5-flash', 'gemini-2.0-flash'];
+    lastGeminiError = '';
     for (const model of models) {
       try {
         const resp = await fetch(
@@ -267,11 +272,17 @@
             })
           }
         );
-        if (!resp.ok) continue;
+        if (!resp.ok) {
+          const errTxt = await resp.text();
+          lastGeminiError = `${model} (${resp.status}): ${errTxt.slice(0, 160)}`;
+          continue;
+        }
         const data = await resp.json();
         const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (raw) return JSON.parse(raw);
-      } catch {}
+      } catch (e) {
+        lastGeminiError = e.message;
+      }
     }
     return null;
   }
@@ -681,7 +692,7 @@ Return ONLY JSON:
         const modelSel = $('ai-model-select')?.value;
         if (modelSel) try { localStorage.setItem('pmflow30_ai_model', modelSel); } catch {}
         const parsed = await fetchGeminiJSON(apiKey, prompt, 0.9);
-        if (!parsed) throw new Error('Gemini API error or quota exceeded');
+        if (!parsed) throw new Error(lastGeminiError || 'Gemini API error or quota exceeded');
         parsed.id = `pm-ai-${Date.now()}`;
         customLessons.unshift(parsed);
         saveJSON(KEYS.CUSTOM_LESSONS, customLessons);
