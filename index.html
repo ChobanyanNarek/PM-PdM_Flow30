@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="hy" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>PMFlow 30 — Daily Product &amp; Project Management Gym</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PMFlow 30" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="master-progress-track" aria-hidden="true">
+    <div id="master-progress-bar" class="master-progress-fill" style="width: 0%"></div>
+  </div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand">
+        <img src="./icon.svg" alt="" class="brand-icon" width="28" height="28" />
+        <span class="brand-name">PMFlow <span class="brand-num">30</span></span>
+      </div>
+      <button id="btn-open-lessons" class="lesson-pill" type="button" title="Auto-Curriculum &amp; Cases">
+        <span id="header-lesson-title" class="lesson-pill-text">Loading...</span>
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="header-center">
+      <div class="master-timer-group" role="timer" aria-label="30-Minute Master Timer">
+        <span class="timer-label">PM GYM</span>
+        <span id="master-timer-display" class="timer-digits">30:00</span>
+        <button id="btn-master-toggle" class="icon-btn" type="button" title="Start / Pause timer">
+          <svg id="icon-master-play" class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-master-pause" class="icon-sm hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button id="btn-master-reset" class="icon-btn" type="button" title="Reset session">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button id="btn-lang-toggle" class="tool-btn active" type="button" title="Switch Language Mode">
+        <span id="lang-label">HY + EN</span>
+      </button>
+
+      <button id="btn-open-vault" class="tool-btn" type="button" title="PM Vault &amp; Streak">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        <span class="hide-mobile">Vault</span>
+        <span id="vault-due-badge" class="due-badge hidden">0</span>
+      </button>
+
+      <button id="btn-theme-toggle" class="icon-btn" type="button" title="Toggle Dark/Light Mode">
+        <svg id="icon-sun" class="icon-sm hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg id="icon-moon" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section id="blitz-banner" class="blitz-banner hidden">
+      <div class="blitz-banner-content">
+        <div class="blitz-badge">PM WARM-UP</div>
+        <div>
+          <strong id="blitz-banner-title">Frameworks due for review</strong>
+          <p class="muted-text">Run a 60-Second Blitz Recall on your past PM decisions before today's case.</p>
+        </div>
+      </div>
+      <div class="blitz-banner-actions">
+        <button id="btn-start-blitz" class="btn btn-primary btn-sm" type="button">Start 60s Blitz</button>
+        <button id="btn-dismiss-blitz" class="btn btn-ghost btn-sm" type="button">Skip</button>
+      </div>
+    </section>
+
+    <nav class="stage-stepper" aria-label="30-Minute PM Workflow">
+      <button id="step-btn-1" class="step-item active" type="button" data-stage="1">
+        <span class="step-num">1</span>
+        <span class="step-meta">
+          <span class="step-title">Mental Model &amp; Framework</span>
+          <span class="step-time">00:00 – 10:00</span>
+        </span>
+      </button>
+      <div class="step-connector"></div>
+      <button id="step-btn-2" class="step-item locked" type="button" data-stage="2" disabled>
+        <span class="step-num">2</span>
+        <span class="step-meta">
+          <span class="step-title">Real Project Application</span>
+          <span class="step-time">10:00 – 20:00</span>
+        </span>
+        <svg class="step-lock icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
+      <div class="step-connector"></div>
+      <button id="step-btn-3" class="step-item locked" type="button" data-stage="3" disabled>
+        <span class="step-num">3</span>
+        <span class="step-meta">
+          <span class="step-title">Crisis &amp; Decision Sim</span>
+          <span class="step-time">20:00 – 30:00</span>
+        </span>
+        <svg class="step-lock icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
+    </nav>
+
+    <!-- STAGE 1 -->
+    <section id="stage-1" class="stage-panel">
+      <div class="stage-header">
+        <div>
+          <span class="stage-kicker">STAGE 1 · FRAMEWORK INPUT (10 MIN)</span>
+          <h1 id="stage1-lesson-title" class="stage-heading">Loading...</h1>
+        </div>
+        <div class="stage-timer-pill">
+          <span class="timer-label">STAGE 1</span>
+          <span id="stage1-timer" class="timer-digits">10:00</span>
+        </div>
+      </div>
+
+      <div class="stage1-grid">
+        <article class="card reading-card">
+          <div class="card-header-row">
+            <span id="lesson-level-tag" class="tag">Mid → Senior PM</span>
+            <span id="lesson-category-tag" class="muted-text">Product Strategy</span>
+          </div>
+          <p id="reading-passage" class="reading-passage"></p>
+        </article>
+
+        <aside class="stage1-sidebar">
+          <div id="vocab-inspector" class="card inspector-card">
+            <div class="inspector-header">
+              <span class="stage-kicker">CONCEPT INSPECTOR</span>
+            </div>
+            <h2 id="inspector-phrase" class="inspector-phrase">Select a concept</h2>
+            <p id="inspector-feynman" class="inspector-feynman">Click any highlighted concept in the passage to see its Feynman explanation and Typical PM vs. Staff/Principal PM framing.</p>
+            <div id="inspector-examples" class="contrast-box hidden">
+              <div class="contrast-row">
+                <span class="contrast-label b1">Typical PM Trap</span>
+                <span id="inspector-basic" class="contrast-text"></span>
+              </div>
+              <div class="contrast-row">
+                <span class="contrast-label c1">Staff / Principal PM</span>
+                <span id="inspector-pro" class="contrast-text"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card gate-card">
+            <div class="gate-header">
+              <span class="stage-kicker">COMPLETION GATE</span>
+              <span id="stage1-check-count" class="gate-count">0 / 5 Understood</span>
+            </div>
+            <ul id="stage1-checklist" class="checklist"></ul>
+            <button id="btn-unlock-stage2" class="btn btn-primary btn-full" type="button" disabled>
+              Complete 5 Concepts to Unlock Stage 2
+            </button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- STAGE 2 -->
+    <section id="stage-2" class="stage-panel hidden">
+      <div class="stage-header">
+        <div>
+          <span class="stage-kicker">STAGE 2 · REAL PROJECT APPLICATION (10 MIN)</span>
+          <h2 class="stage-heading">Apply to Your Own Product / Project</h2>
+          <p class="muted-text">Explain each concept simply, then apply it to your real project or team (in Armenian or English).</p>
+        </div>
+        <div class="stage-timer-pill">
+          <span class="timer-label">STAGE 2</span>
+          <span id="stage2-timer" class="timer-digits">10:00</span>
+        </div>
+      </div>
+
+      <div id="anchor-builder-list" class="anchor-list"></div>
+
+      <div class="stage-footer-bar card">
+        <div class="gate-status">
+          <strong id="stage2-anchor-count">0 / 5 Project Applications Completed</strong>
+          <span class="muted-text">Apply all 5 concepts to your real work to unlock Stage 3.</span>
+        </div>
+        <button id="btn-unlock-stage3" class="btn btn-primary" type="button" disabled>
+          Unlock Stage 3: Crisis Simulation
+        </button>
+      </div>
+    </section>
+
+    <!-- STAGE 3 -->
+    <section id="stage-3" class="stage-panel hidden">
+      <div class="stage-header">
+        <div>
+          <span class="stage-kicker">STAGE 3 · HIGH-STAKES DECISION SIM (10 MIN)</span>
+          <h2 class="stage-heading">PM / PdM Crisis &amp; Trade-off Simulation</h2>
+          <p class="muted-text">Write or speak your strategic decision under time pressure (Armenian or English). Aim for 3+ concepts.</p>
+        </div>
+        <div class="stage-timer-pill">
+          <span class="timer-label">STAGE 3</span>
+          <span id="stage3-timer" class="timer-digits">10:00</span>
+        </div>
+      </div>
+
+      <div class="card scenario-card">
+        <span class="stage-kicker">CASE CHALLENGE</span>
+        <p id="roleplay-prompt" class="scenario-prompt"></p>
+      </div>
+
+      <div class="card tracker-card">
+        <div class="tracker-header">
+          <span class="stage-kicker">CONCEPT TRACKER</span>
+          <span id="roleplay-tracker-count" class="gate-count">0 / 5 Used (Goal: 3+)</span>
+        </div>
+        <div id="roleplay-phrase-badges" class="phrase-badges"></div>
+      </div>
+
+      <div class="card response-card">
+        <div class="response-toolbar">
+          <label for="roleplay-textarea" class="stage-kicker">YOUR STRATEGIC DECISION</label>
+        </div>
+        <textarea id="roleplay-textarea" class="roleplay-textarea" rows="6" placeholder="Գրիր քո որոշումն ու քայլերը հայերեն կամ անգլերեն..."></textarea>
+        <div class="response-footer">
+          <span id="roleplay-word-count" class="muted-text">0 words</span>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="btn-roleplay-check" class="btn btn-primary" type="button">
+              Senior PM Mentor Check
+            </button>
+            <button id="btn-complete-session" class="btn btn-success" type="button">
+              Complete 30-Min Gym &amp; Save
+            </button>
+          </div>
+        </div>
+        <div id="roleplay-feedback-panel" class="feedback-box hidden" style="margin-top: 14px;"></div>
+
+        <div id="pushback-panel" class="card hidden" style="margin-top: 16px; border-left: 3px solid var(--warning); background: var(--bg-subtle);">
+          <span class="stage-kicker" style="color: var(--warning-text);">EXECUTIVE PUSHBACK · ROUND 2</span>
+          <p id="pushback-question" style="margin: 6px 0 10px; font-weight: 600;"></p>
+          <textarea id="pushback-textarea" class="roleplay-textarea" rows="3" style="min-height: 90px;" placeholder="Պաշտպանիր քո որոշումը կամ տուր Plan B..."></textarea>
+          <div style="display:flex; justify-content:flex-end; margin-top: 10px;">
+            <button id="btn-pushback-check" class="btn btn-primary btn-sm" type="button">Check Pushback Reply</button>
+          </div>
+          <div id="pushback-feedback-panel" class="feedback-box hidden" style="margin-top: 10px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPLETE -->
+    <section id="stage-complete" class="stage-panel hidden">
+      <div class="complete-hero card">
+        <div class="complete-badge">PM GYM COMPLETE</div>
+        <h2 class="stage-heading">Great work! Today's 5 PM/PdM frameworks are locked in.</h2>
+        <p class="muted-text">Saved to your PM Vault for spaced repetition and added to your streak.</p>
+        <div class="complete-actions">
+          <button id="btn-copy-recall" class="btn btn-primary" type="button">
+            <span id="copy-recall-label">Copy Summary Notes</span>
+          </button>
+          <button id="btn-toggle-flashcards" class="btn btn-secondary" type="button">Flashcard Flip Mode</button>
+          <button id="btn-next-auto-lesson" class="btn btn-success" type="button">Start Next Auto-Case →</button>
+        </div>
+      </div>
+      <div id="night-recall-list" class="recall-grid"></div>
+      <div id="night-recall-flashcards" class="flashcard-stage hidden">
+        <div class="flashcard-controls">
+          <span id="flashcard-counter" class="muted-text">Card 1 of 5</span>
+          <div class="flashcard-nav">
+            <button id="btn-fc-prev" class="btn btn-secondary btn-sm" type="button">Previous</button>
+            <button id="btn-fc-next" class="btn btn-secondary btn-sm" type="button">Next</button>
+          </div>
+        </div>
+        <div id="flashcard-box" class="flashcard-box" tabindex="0" role="button">
+          <div class="flashcard-inner">
+            <div class="flashcard-front card">
+              <span class="stage-kicker">TAP TO FLIP · PM CONCEPT</span>
+              <h3 id="fc-front-phrase" class="fc-phrase"></h3>
+              <p id="fc-front-hint" class="muted-text"></p>
+            </div>
+            <div class="flashcard-back card">
+              <span class="stage-kicker">FEYNMAN &amp; YOUR PROJECT ANCHOR</span>
+              <p id="fc-back-feynman" class="fc-feynman"></p>
+              <div class="fc-anchor-box">
+                <span class="contrast-label c1">Your Project</span>
+                <p id="fc-back-anchor"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: AUTO-PLAN & CASES -->
+  <div id="modal-lessons" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Auto-Curriculum &amp; PM Profile</h2>
+        <button class="icon-btn modal-close" data-close="modal-lessons" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-tabs">
+        <button id="tab-lessons-endless" class="tab-btn active" type="button">Auto-Plan &amp; AI</button>
+        <button id="tab-lessons-browse" class="tab-btn" type="button">Cases Library</button>
+      </div>
+      <div id="panel-lessons-endless" class="modal-body">
+        <div class="vault-stats-row" style="margin-bottom: 14px;">
+          <div class="stat-box"><span class="stat-value" id="profile-level-badge">Mid PM</span><span class="stat-label">PM Level</span></div>
+          <div class="stat-box"><span class="stat-value" id="profile-next-pillar">Strategy</span><span class="stat-label">Next Pillar</span></div>
+          <div class="stat-box"><span class="stat-value" id="profile-weak-count">0</span><span class="stat-label">Hard Cases</span></div>
+        </div>
+        <div class="field-group" style="margin-bottom: 12px;">
+          <label class="field-label" for="endless-role-input">Your Domain / Product Type (Optional)</label>
+          <input id="endless-role-input" class="text-input" type="text" placeholder="e.g., B2B SaaS, Fintech, Mobile App, Agency Projects..." />
+        </div>
+        <div class="field-group" style="margin-bottom: 12px;">
+          <label class="field-label" for="gemini-api-key">Gemini API Key (Optional — for infinite AI PM cases &amp; Senior Mentor feedback)</label>
+          <input id="gemini-api-key" class="text-input" type="password" placeholder="Paste Gemini API Key..." autocomplete="off" />
+        </div>
+        <div class="field-group" style="margin-bottom: 14px;">
+          <label class="field-label" for="ai-model-select">AI Mentor Model</label>
+          <select id="ai-model-select" class="text-input">
+            <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro (Deep Staff/Principal Reasoning)</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast / High Free Quota)</option>
+          </select>
+        </div>
+        <button id="btn-auto-generate-now" class="btn btn-primary btn-full" type="button">
+          <span id="ai-gen-label">Generate Next Auto-Case Now</span>
+        </button>
+        <p id="ai-gen-error" class="error-text hidden"></p>
+      </div>
+      <div id="panel-lessons-browse" class="modal-body hidden">
+        <div id="lesson-list" class="lesson-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VAULT -->
+  <div id="modal-vault" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h2>PM Memory Vault &amp; Consistency</h2>
+        <button class="icon-btn modal-close" data-close="modal-vault" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="vault-stats-row">
+          <div class="stat-box"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">Day Streak</span></div>
+          <div class="stat-box"><span class="stat-value" id="stat-total-sessions">0</span><span class="stat-label">Cases Done</span></div>
+          <div class="stat-box"><span class="stat-value" id="stat-mastered-count">0</span><span class="stat-label">Concepts Saved</span></div>
+        </div>
+        <div class="heatmap-section">
+          <span class="stage-kicker">28-DAY CONSISTENCY</span>
+          <div id="streak-heatmap" class="heatmap-grid"></div>
+        </div>
+        <div class="heatmap-section" style="margin-bottom: 18px;">
+          <span class="stage-kicker">WEAK-SPOT RADAR (AVG SCORE BY DOMAIN)</span>
+          <div id="weak-spot-radar" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+        </div>
+        <div class="vault-list-header">
+          <span class="stage-kicker">SAVED CONCEPTS</span>
+          <button id="btn-vault-blitz" class="btn btn-primary btn-xs" type="button">Launch 60s Blitz Recall</button>
+        </div>
+        <div id="vault-items-list" class="vault-items-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BLITZ -->
+  <div id="modal-blitz" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div><span class="stage-kicker">PM SPACED REPETITION</span><h2>60-Second Blitz Recall</h2></div>
+        <div class="stage-timer-pill"><span id="blitz-timer" class="timer-digits">01:00</span></div>
+      </div>
+      <div class="modal-body">
+        <div id="blitz-active-view">
+          <p class="muted-text" id="blitz-progress-label">Item 1</p>
+          <div class="blitz-card">
+            <p class="blitz-hint" id="blitz-feynman-clue"></p>
+            <p class="blitz-sentence" id="blitz-blank-sentence"></p>
+          </div>
+          <div class="blitz-input-row">
+            <input id="blitz-answer-input" type="text" class="text-input" placeholder="Type the PM concept..." autocomplete="off" />
+            <button id="btn-blitz-check" class="btn btn-primary" type="button">Check</button>
+          </div>
+          <p id="blitz-feedback" class="blitz-feedback hidden"></p>
+          <div class="blitz-skip-row">
+            <button id="btn-blitz-reveal" class="btn btn-ghost btn-xs" type="button">Reveal Answer</button>
+            <button id="btn-blitz-close" class="btn btn-ghost btn-xs" type="button">Exit</button>
+          </div>
+        </div>
+        <div id="blitz-done-view" class="hidden">
+          <h3 id="blitz-score-heading">Blitz Complete!</h3>
+          <p id="blitz-score-sub" class="muted-text"></p>
+          <div class="modal-footer-actions">
+            <button id="btn-blitz-finish" class="btn btn-primary" type="button">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./data/pm_lessons.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

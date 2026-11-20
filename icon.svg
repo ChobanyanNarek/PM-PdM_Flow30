@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="pm-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="pm-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#pm-bg)"/>
+  <!-- Strategic Roadmap / Milestone Nodes -->
+  <path d="M132 344 L224 224 L304 276 L380 156" fill="none" stroke="url(#pm-gold)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="132" cy="344" r="24" fill="#F8FAFC"/>
+  <circle cx="224" cy="224" r="24" fill="#F59E0B"/>
+  <circle cx="304" cy="276" r="24" fill="#38BDF8"/>
+  <circle cx="380" cy="156" r="28" fill="#10B981"/>
+  <!-- Executive Target Ring -->
+  <circle cx="380" cy="156" r="46" fill="none" stroke="#10B981" stroke-width="8" opacity="0.45"/>
+</svg>

@@ -1,0 +1,18 @@
+{
+  "name": "PMFlow 30 — Daily Product & Project Management Gym",
+  "short_name": "PMFlow 30",
+  "description": "Daily 30-minute Senior/Staff Product & Project Management gym with bilingual frameworks, real project application, executive pushback simulations, and spaced repetition.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0B0F17",
+  "theme_color": "#0F172A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
