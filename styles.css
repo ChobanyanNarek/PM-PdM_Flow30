@@ -1449,3 +1449,94 @@ h1, h2, h3, h4 {
 .app-main {
   padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
 }
+
+/* Crisp Icon & Text Vertical Alignment + Clean Mobile Header Grid */
+.btn,
+.tool-btn,
+.icon-btn,
+.lesson-pill,
+.tag,
+.phrase-badge,
+.stage-timer-pill,
+.master-timer-group {
+  line-height: 1.2;
+}
+
+.icon-btn svg,
+.tool-btn svg,
+.btn svg,
+.lesson-pill svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "left right"
+      "center center";
+    gap: 8px 10px;
+    padding-bottom: 10px;
+  }
+
+  .header-left {
+    grid-area: left;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .header-right {
+    grid-area: right;
+    gap: 4px;
+  }
+
+  .header-center {
+    grid-area: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .brand-name {
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+
+  .lesson-pill {
+    max-width: 135px;
+    padding: 5px 8px;
+    font-size: 0.78rem;
+  }
+
+  .master-timer-group {
+    width: 100%;
+    justify-content: center;
+    padding: 5px 12px;
+  }
+
+  .stage-stepper {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .step-item {
+    padding: 8px 8px;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    font-size: 0.72rem;
+  }
+
+  .step-title {
+    font-size: 0.76rem;
+  }
+}
