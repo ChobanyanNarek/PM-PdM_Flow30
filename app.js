@@ -255,33 +255,78 @@
 
   let lastGeminiError = '';
 
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function discoverGeminiModel(apiKey) {
+    try {
+      const resp = await fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+        {},
+        8000
+      );
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      const candidates = (data.models || [])
+        .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/i.test(m.name) && !/image|tts|audio|embedding/i.test(m.name))
+        .map((m) => m.name.replace(/^models\//, ''));
+      return candidates.find((n) => /flash/i.test(n)) || candidates[0] || null;
+    } catch {
+      return null;
+    }
+  }
+
   async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4) {
     const primary = getSelectedModel();
     const models = primary === 'gemini-3.8-flash'
-      ? ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite']
+      ? ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite']
       : ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash-lite'];
     lastGeminiError = '';
+
+    const tryModel = async (model) => {
+      const resp = await fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { responseMimeType: 'application/json', temperature }
+          })
+        },
+        18000
+      );
+      if (!resp.ok) {
+        const errTxt = await resp.text();
+        lastGeminiError = `${model} (${resp.status}): ${errTxt.slice(0, 140)}`;
+        return null;
+      }
+      const data = await resp.json();
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      return raw ? JSON.parse(raw) : null;
+    };
+
     for (const model of models) {
       try {
-        const resp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }] }],
-              generationConfig: { responseMimeType: 'application/json', temperature }
-            })
-          }
-        );
-        if (!resp.ok) {
-          const errTxt = await resp.text();
-          lastGeminiError = `${model} (${resp.status}): ${errTxt.slice(0, 160)}`;
-          continue;
-        }
-        const data = await resp.json();
-        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (raw) return JSON.parse(raw);
+        const res = await tryModel(model);
+        if (res) return res;
+      } catch (e) {
+        lastGeminiError = e.name === 'AbortError' ? `${model}: Request timed out (18s)` : e.message;
+      }
+    }
+
+    const discovered = await discoverGeminiModel(apiKey);
+    if (discovered && !models.includes(discovered)) {
+      try {
+        const res = await tryModel(discovered);
+        if (res) return res;
       } catch (e) {
         lastGeminiError = e.message;
       }
