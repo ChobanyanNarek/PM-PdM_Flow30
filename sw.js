@@ -1,10 +1,10 @@
-const CACHE_NAME = 'pmflow30-v9';
+const CACHE_NAME = 'pmflow30-v10';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css',
-  './app.js',
-  './data/pm_lessons.js',
+  './styles.css?v=10',
+  './app.js?v=10',
+  './data/pm_lessons.js?v=10',
   './manifest.json',
   './icon.svg'
 ];
