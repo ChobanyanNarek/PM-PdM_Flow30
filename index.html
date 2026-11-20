@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=14" />
+  <link rel="stylesheet" href="./styles.css?v=15" />
 </head>
 <body>
   <div class="master-progress-track" aria-hidden="true">
@@ -66,6 +66,11 @@
   </header>
 
   <main class="app-main">
+    <section id="ai-status-banner" class="feedback-box ok hidden" style="margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+      <span id="ai-status-text"></span>
+      <button id="btn-close-ai-status" class="icon-btn" type="button" aria-label="Close">✕</button>
+    </section>
+
     <section id="blitz-banner" class="blitz-banner hidden">
       <div class="blitz-banner-content">
         <div class="blitz-badge">PM WARM-UP</div>
@@ -399,7 +404,7 @@
     </div>
   </div>
 
-  <script src="./data/pm_lessons.js?v=14"></script>
-  <script src="./app.js?v=14"></script>
+  <script src="./data/pm_lessons.js?v=15"></script>
+  <script src="./app.js?v=15"></script>
 </body>
 </html>

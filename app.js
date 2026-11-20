@@ -778,11 +778,13 @@ Return ONLY JSON:
           if (labelEl) labelEl.textContent = msg;
         });
         if (!parsed) throw new Error(lastGeminiError || 'Gemini API error or quota exceeded');
+        const usedModel = localStorage.getItem('pmflow30_working_model') || getSelectedModel();
         parsed.id = `pm-ai-${Date.now()}`;
         customLessons.unshift(parsed);
         saveJSON(KEYS.CUSTOM_LESSONS, customLessons);
         loadLesson(parsed.id);
         $('modal-lessons').classList.add('hidden');
+        showStatusBanner(`✓ AI Case Ready (${usedModel}): "${parsed.title}"`, 'ok');
         return;
       } catch (err) {
         if (errEl) {
@@ -803,6 +805,19 @@ Return ONLY JSON:
     }
     loadLesson(lesson.id);
     $('modal-lessons').classList.add('hidden');
+    showStatusBanner(`⚡ Offline Adaptive Case Loaded: "${t(lesson.title)}"`, 'warn');
+  }
+
+  function showStatusBanner(msg, type = 'ok') {
+    const el = $('ai-status-banner');
+    if (!el) return;
+    el.className = `feedback-box ${type}`;
+    el.style.display = 'flex';
+    $('ai-status-text').textContent = msg;
+    el.classList.remove('hidden');
+  }
+  if ($('btn-close-ai-status')) {
+    $('btn-close-ai-status').addEventListener('click', () => $('ai-status-banner').classList.add('hidden'));
   }
 
   $('btn-next-auto-lesson').addEventListener('click', () => generateNextPMCase($('btn-next-auto-lesson'), null, null));
