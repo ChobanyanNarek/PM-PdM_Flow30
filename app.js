@@ -310,7 +310,7 @@
             generationConfig: { responseMimeType: 'application/json', temperature }
           })
         },
-        12000
+        30000
       );
       if (!resp.ok) {
         const errTxt = await resp.text();
@@ -726,26 +726,26 @@ Return ONLY JSON: { "isStrong": true/false, "feedback": "2 sharp sentences." }`)
       if (labelEl) labelEl.textContent = `Generating ${level} Case...`;
       const recent = vault.map((v) => v.phrase).slice(0, 20);
       const weak = vault.filter((v) => v.difficulty === 'hard').map((v) => v.phrase).slice(0, 5);
-      const prompt = `Create a brand-new, challenging Product & Project Management 30-minute case lesson for a ${level} (${p.domain || 'Tech / Software'}).
-Suggested angle (feel free to pick ANY high-leverage PM/PdM/Business/Tech/Leadership topic, do NOT limit to fixed categories): ${nextTopic}.
-Weak concepts to reinforce if natural: ${weak.join(', ') || 'none'}.
-Avoid repeating: ${recent.join(', ') || 'none'}.
-CRITICAL: Provide BOTH "hy" (Armenian prose with English PM terms verbatim) and "en" (English). All 5 "phrase" values (in English, 1-3 words) MUST appear verbatim inside BOTH contextText.hy and contextText.en.
+      const isHy = state.lang === 'hy';
+      const prompt = `Create a challenging Product & Project Management 30-minute case lesson for a ${level} (${p.domain || 'Tech / Software'}).
+Topic: ${nextTopic}. Weak concepts: ${weak.join(', ') || 'none'}. Avoid: ${recent.join(', ') || 'none'}.
+Language: ${isHy ? 'Armenian prose with exact English PM terms (1-3 words)' : 'English'}.
+CRITICAL: All 5 "phrase" values (in English, 1-3 words) MUST appear verbatim inside "contextText".
 Return ONLY JSON:
 {
-  "title": { "hy": "...", "en": "..." },
-  "category": { "hy": "...", "en": "..." },
+  "title": "...",
+  "category": "Auto · ${nextTopic}",
   "level": "${level}",
-  "contextText": { "hy": "110-140 words in Armenian containing all 5 exact English phrases", "en": "110-140 words in English containing all 5 exact phrases" },
+  "contextText": "100-130 words containing all 5 exact English phrases verbatim",
   "concepts": [
     {
       "phrase": "exact English PM term",
-      "feynman": { "hy": "...", "en": "..." },
-      "juniorView": { "hy": "Typical PM Trap...", "en": "Typical PM Trap..." },
-      "seniorView": { "hy": "Staff/Principal PM framing...", "en": "Staff/Principal PM framing..." }
+      "feynman": "1 short sentence",
+      "juniorView": "Typical PM Trap...",
+      "seniorView": "Staff/Principal PM framing..."
     }
   ],
-  "roleplayPrompt": { "hy": "Realistic executive/PM dilemma in Armenian asking for 4-5 sentences using 3+ concepts", "en": "Same case in English" }
+  "roleplayPrompt": "Realistic executive/PM dilemma asking for 4-5 sentences using 3+ concepts"
 }`;
       try {
         const modelSel = $('ai-model-select')?.value;
