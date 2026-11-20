@@ -248,16 +248,18 @@
   });
 
   function getSelectedModel() {
-    return localStorage.getItem('pmflow30_ai_model') || 'gemini-2.5-pro';
+    const saved = localStorage.getItem('pmflow30_ai_model');
+    if (saved === 'gemini-3.8-flash' || saved === 'gemini-3.5-flash-lite') return saved;
+    return 'gemini-3.8-flash';
   }
 
   let lastGeminiError = '';
 
   async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4) {
     const primary = getSelectedModel();
-    const models = primary === 'gemini-2.5-pro'
-      ? ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
-      : ['gemini-2.5-flash', 'gemini-2.0-flash'];
+    const models = primary === 'gemini-3.8-flash'
+      ? ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite']
+      : ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash-lite'];
     lastGeminiError = '';
     for (const model of models) {
       try {
