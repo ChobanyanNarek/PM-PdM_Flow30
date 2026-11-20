@@ -283,14 +283,23 @@
     }
   }
 
-  async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4) {
+  async function fetchGeminiJSON(apiKey, promptText, temperature = 0.4, statusCb = null) {
     const primary = getSelectedModel();
-    const models = primary === 'gemini-3.8-flash'
+    const cachedModel = localStorage.getItem('pmflow30_working_model');
+    const baseModels = primary === 'gemini-3.8-flash'
       ? ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite']
       : ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash-lite'];
+
+    const models = cachedModel && !baseModels.includes(cachedModel)
+      ? [cachedModel, ...baseModels]
+      : cachedModel
+      ? [cachedModel, ...baseModels.filter((m) => m !== cachedModel)]
+      : baseModels;
+
     lastGeminiError = '';
 
     const tryModel = async (model) => {
+      if (statusCb) statusCb(`Calling ${model}...`);
       const resp = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
         {
@@ -301,7 +310,7 @@
             generationConfig: { responseMimeType: 'application/json', temperature }
           })
         },
-        18000
+        12000
       );
       if (!resp.ok) {
         const errTxt = await resp.text();
@@ -310,25 +319,28 @@
       }
       const data = await resp.json();
       const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      return raw ? JSON.parse(raw) : null;
+      if (raw) {
+        try { localStorage.setItem('pmflow30_working_model', model); } catch {}
+        return JSON.parse(raw);
+      }
+      return null;
     };
+
+    // Fast-discover supported models first if no cached working model
+    if (!cachedModel) {
+      if (statusCb) statusCb('Checking available Gemini models...');
+      const discovered = await discoverGeminiModel(apiKey);
+      if (discovered && !models.includes(discovered)) {
+        models.unshift(discovered);
+      }
+    }
 
     for (const model of models) {
       try {
         const res = await tryModel(model);
         if (res) return res;
       } catch (e) {
-        lastGeminiError = e.name === 'AbortError' ? `${model}: Request timed out (18s)` : e.message;
-      }
-    }
-
-    const discovered = await discoverGeminiModel(apiKey);
-    if (discovered && !models.includes(discovered)) {
-      try {
-        const res = await tryModel(discovered);
-        if (res) return res;
-      } catch (e) {
-        lastGeminiError = e.message;
+        lastGeminiError = e.name === 'AbortError' ? `${model}: Timed out (12s)` : e.message;
       }
     }
     return null;
@@ -738,7 +750,9 @@ Return ONLY JSON:
       try {
         const modelSel = $('ai-model-select')?.value;
         if (modelSel) try { localStorage.setItem('pmflow30_ai_model', modelSel); } catch {}
-        const parsed = await fetchGeminiJSON(apiKey, prompt, 0.9);
+        const parsed = await fetchGeminiJSON(apiKey, prompt, 0.9, (msg) => {
+          if (labelEl) labelEl.textContent = msg;
+        });
         if (!parsed) throw new Error(lastGeminiError || 'Gemini API error or quota exceeded');
         parsed.id = `pm-ai-${Date.now()}`;
         customLessons.unshift(parsed);
