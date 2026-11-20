@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pmflow30-v5';
+const CACHE_NAME = 'pmflow30-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -23,20 +23,18 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first so updates on GitHub Pages appear immediately when online
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) =>
-      cached ||
-      fetch(event.request)
-        .then((res) => {
-          if (res && res.status === 200 && res.type === 'basic') {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return res;
-        })
-        .catch(() => caches.match('./index.html'))
-    )
+    fetch(event.request)
+      .then((res) => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(event.request).then((c) => c || caches.match('./index.html')))
   );
 });
