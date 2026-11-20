@@ -700,7 +700,11 @@ Return ONLY JSON:
         $('modal-lessons').classList.add('hidden');
         return;
       } catch (err) {
-        if (errEl) { errEl.textContent = `${err.message} — loaded offline adaptive case instead.`; errEl.classList.remove('hidden'); }
+        if (errEl) {
+          errEl.textContent = `${err.message}`;
+          errEl.classList.remove('hidden');
+          if (btnEl && btnEl.id === 'btn-auto-generate-now') return;
+        }
       } finally {
         if (btnEl) btnEl.disabled = false;
         if (labelEl) labelEl.textContent = 'Generate Next Auto-Case Now';
